@@ -3,5 +3,7 @@ extends layout
 block content
 	
 	h1 #{typeof(cast)}
-	//- -for(let i = 0; i < cast.length; i++)
-	h1 #{cast}
+	- var newCastSplit = cast.split(",");
+	//- h1 #{typeof(newCastSplit)}
+	-for(let i = 0; i < newCastSplit.length; i++)
+		li #{newCastSplit[i]}
