@@ -26,30 +26,40 @@ router.post("/movieData", (req, res, next)=>{
 	request(movieDBURL)
 	.then((res)=>{
 		var parsedMovieData = JSON.parse(res);
-		var castsCrewArray = []
+		var newUrl ="";
+
+		// ====make 5 different api calls with promise all using the request-promise module========
 		for(let i = 0; i <5; i++){
 			var movieID = parsedMovieData.results[i].id;
 			// console.log(movieID);
-			const newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey
-			request(newUrl)
-			.then((res)=>{
-				var castsCrew = JSON.parse(res);
-				// console.log(castsCrew.cast);
-				for(let i =0; i<castsCrew.cast.length; i++){
-					castsCrewArray.push(castsCrew.cast[i].name);
-				}
-				return castsCrewArray;
-			})
-			.then((res)=>{
-				console.log(res);
-				// for(let i =0; i<res.length; i++){
-				// 	console.log(res[i].slice().sort());
-				// }
-				var newArray = require("uniq")(res);
-				console.log(newArray);
-			})
-
+			newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey
+			console.log(movieID);
 		}
+		console.log(newUrl);
+		return newUrl;
+	})
+	.then((res)=>{
+		request(res)
+		.then((res)=>{
+			var castsCrew = JSON.parse(res);
+			var castsCrewArray = []
+			// console.log(castsCrew.cast);
+			console.log(castsCrew.cast.length);
+			for(let i =0; i<castsCrew.cast.length; i++){
+				
+				castsCrewArray.push(castsCrew.cast[i].name);
+			}
+			// console.log(castsCrewArray);
+			return castsCrewArray;
+		})
+		.then((res)=>{
+			// console.log(res);
+			// for(let i =0; i<res.length; i++){
+			// 	console.log(res[i].slice().sort());
+			// }
+			var newArray = require("uniq")(res);
+			console.log(newArray);
+		})
 	})
 
 })
