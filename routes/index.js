@@ -8,17 +8,7 @@ var request = require("request-promise");
 // const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey
 // const imageBaseUrl = 'http://image.tmdb.org/t/p/w300';
 
-// var movieNameRequest = function(movieName){
-// 	const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey+`&query=${movieName}`
-// 	request.get(movieDBURL, (error, response, movieData)=>{
-// 		// console.log(movieData);
-// 		var parsedMovieData = JSON.parse(movieData);
-// 		var movieID = parsedMovieData.results[0].id;
-// 		return movieID;
-// 	})
-// }
-
-
+// ==========Question2==========
 
 router.get("/", function(req, res, next){
 	res.render("index", {title: "Express"})
@@ -27,39 +17,84 @@ router.get("/results/:casts", function(req, res, next){
 	var castArray = req.params.casts;
 	res.render("results", {cast: castArray})
 });
-
+router.get("/results", function(req, res, next){
+	res.redirect("/results/Hello World");
+})
 router.post("/movieData", (req, res, next)=>{
 	var userInput = req.body.movieName;
 	const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey+`&query=${userInput}`
-
-	
 	request(movieDBURL)
 	.then((res)=>{
 		var parsedMovieData = JSON.parse(res);
-		var movieID = parsedMovieData.results[0].id;
-		const newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey	
-		return request(newUrl);
-	})
-	.then((res)=>{
-		// console.log(res);
-		var parsedMovieData = JSON.parse(res);
-		return parsedMovieData;
-	})
-	.then((res)=>{
-		var castArray = []
-		for(let i =0; i<res.cast.length; i++){
-			castArray.push(res.cast[i].name);
+		var castsCrewArray = []
+		for(let i = 0; i <5; i++){
+			var movieID = parsedMovieData.results[i].id;
+			// console.log(movieID);
+			const newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey
+			request(newUrl)
+			.then((res)=>{
+				var castsCrew = JSON.parse(res);
+				// console.log(castsCrew.cast);
+				for(let i =0; i<castsCrew.cast.length; i++){
+					castsCrewArray.push(castsCrew.cast[i].name);
+				}
+				return castsCrewArray;
+			})
+			.then((res)=>{
+				console.log(res);
+				// for(let i =0; i<res.length; i++){
+				// 	console.log(res[i].slice().sort());
+				// }
+				var newArray = require("uniq")(res);
+				console.log(newArray);
+			})
+
 		}
-		return castArray
 	})
-	.then((res2)=>{
-		res.redirect("/results/" + res2);
-	})	
-	
+
 })
 
 
-// ====================	 Like call back
+// ==========QUESTION 1==========
+// router.get("/", function(req, res, next){
+// 	res.render("index", {title: "Express"})
+// });
+// router.get("/results/:casts", function(req, res, next){
+// 	var castArray = req.params.casts;
+// 	res.render("results", {cast: castArray})
+// });
+// router.get("/results", function(req, res, next){
+// 	res.redirect("/results/Hello World");
+// })
+// router.post("/movieData", (req, res, next)=>{
+// 	var userInput = req.body.movieName;
+// 	const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey+`&query=${userInput}`
+// 	request(movieDBURL)
+// 	.then((res)=>{
+// 		var parsedMovieData = JSON.parse(res);
+// 		var movieID = parsedMovieData.results[0].id;
+// 		const newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey	
+// 		return request(newUrl);
+// 	})
+// 	.then((res)=>{
+// 		// console.log(res);
+// 		var parsedMovieData = JSON.parse(res);
+// 		return parsedMovieData;
+// 	})
+// 	.then((res)=>{
+// 		var castArray = []
+// 		for(let i =0; i<res.cast.length; i++){
+// 			castArray.push(res.cast[i].name);
+// 		}
+// 		return castArray
+// 	})
+// 	.then((res2)=>{
+// 		res.redirect("/results/" + res2);
+// 	});
+// })
+
+
+// ====================	 Like call back=============
 // router.post("/movieData", function(req, res, next){
 // 	var movieIdPromise = new Promise((resolve, reject)=>{
 // 		var userInput = req.body.movieName;
