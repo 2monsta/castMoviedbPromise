@@ -3,10 +3,7 @@ var router = express.Router();
 var config = require("../config/config");
 // var request = require("request");
 var request = require("request-promise");
-// var fetch =require("isomorphic-fetch");
-// const apiBaseUrl = 'http://api.themoviedb.org/3';
-// const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey
-// const imageBaseUrl = 'http://image.tmdb.org/t/p/w300';
+
 
 // ==========Question2==========
 
@@ -20,48 +17,87 @@ router.get("/results/:casts", function(req, res, next){
 router.get("/results", function(req, res, next){
 	res.redirect("/results/Hello World");
 })
+
+//==================== PROBLEM WITH THIS ONE IS DATA DON"T COME BACK AT SAME RATE
+// router.post("/movieData", (req, res, next)=>{
+// 	var userInput = req.body.movieName;
+// 	const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey+`&query=${userInput}`
+// 	request(movieDBURL)
+// 	.then((res)=>{
+// 		var parsedMovieData = JSON.parse(res);
+// 		var castsCrewArray = []
+// 		for(let i = 0; i <5; i++){
+// 			var movieID = parsedMovieData.results[i].id;
+// 			// console.log(movieID);
+// 			const newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey
+// 			request(newUrl)
+// 			.then((res)=>{
+// 				var castsCrew = JSON.parse(res);
+// 				// console.log(castsCrew.cast);
+// 				for(let i =0; i<castsCrew.cast.length; i++){
+// 					castsCrewArray.push(castsCrew.cast[i].name);
+// 				}
+// 				return castsCrewArray;
+// 			})
+// 			.then((res)=>{
+// 				console.log(res);
+// 				// for(let i =0; i<res.length; i++){
+// 				// 	console.log(res[i].slice().sort());
+// 				// }
+// 				var newArray = require("uniq")(res);
+// 				console.log(newArray);
+// 			})
+// 		}
+// 	})
+// })
+
+// ====================== ONEWAY TO DO IT=====================
 router.post("/movieData", (req, res, next)=>{
 	var userInput = req.body.movieName;
 	const movieDBURL = 'http://api.themoviedb.org/3/search/movie?api_key='+config.apiKey+`&query=${userInput}`
 	request(movieDBURL)
 	.then((res)=>{
 		var parsedMovieData = JSON.parse(res);
-		var newUrl ="";
-
 		// ====make 5 different api calls with promise all using the request-promise module========
+		
+		var url0 = {			
+			json: true
+		}
+		var url1 ={		
+			json: true
+		}
+		var url2 ={	
+			json: true
+		}
+		var url3 ={	
+			json: true
+		}
+		var url4 ={
+			json: true
+		}
+		var urls =[url0, url1, url2, url3, url4]
 		for(let i = 0; i <5; i++){
 			var movieID = parsedMovieData.results[i].id;
-			// console.log(movieID);
-			newUrl = `http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey
-			console.log(movieID);
+			urls[i].uri = (`http://api.themoviedb.org/3/movie/${movieID}/casts?api_key=`+config.apiKey)
+			console.log(urls[i].uri);
 		}
-		console.log(newUrl);
-		return newUrl;
-	})
-	.then((res)=>{
-		request(res)
+		Promise.all([
+			request(urls[0]),
+			request(urls[1]),
+			request(urls[2]),
+			request(urls[3]),
+			request(urls[4])
+		])
 		.then((res)=>{
-			var castsCrew = JSON.parse(res);
-			var castsCrewArray = []
-			// console.log(castsCrew.cast);
-			console.log(castsCrew.cast.length);
-			for(let i =0; i<castsCrew.cast.length; i++){
-				
-				castsCrewArray.push(castsCrew.cast[i].name);
+			var namesArray = [];
+			for(let i =0; i<res.length; i++){
+				for(let j = 0; j<res[i].cast.length; j++){
+					namesArray.push(res[i].cast[j].name);
+				}
 			}
-			// console.log(castsCrewArray);
-			return castsCrewArray;
-		})
-		.then((res)=>{
-			// console.log(res);
-			// for(let i =0; i<res.length; i++){
-			// 	console.log(res[i].slice().sort());
-			// }
-			var newArray = require("uniq")(res);
-			console.log(newArray);
+			console.log(require("uniq")(namesArray));
 		})
 	})
-
 })
 
 
